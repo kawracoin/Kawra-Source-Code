@@ -1,78 +1,154 @@
-Kawra Core integration/staging tree
-=====================================
+# Kawra (KAWRA)
 
-https://bitcoincore.org
+**Kawra** is a SHA-256 Proof-of-Work cryptocurrency built on Bitcoin Core 25.0. Designed with simplicity, fairness, and decentralization in mind, Kawra has a limited fixed supply and predictable emission schedule.
 
-For an immediately usable, binary version of the Kawra Core software, see
-https://bitcoincore.org/en/download/.
+This repository contains the full Kawra blockchain node and wallet source code.
 
-What is Kawra Core?
----------------------
+---
 
-Kawra Core connects to the Kawra peer-to-peer network to download and fully
-validate blocks and transactions. It also includes a wallet and graphical user
-interface, which can be optionally built.
+## 🪙 Coin Properties
 
-Further information about Kawra Core is available in the [doc folder](/doc).
+| Property                  | Value                       |
+|---------------------------|-----------------------------|
+| **Coin Name**             | Kawra                       |
+| **Ticker**                | KAWRA                       |
+| **Unit**                  | ka                          |
+| **Algorithm**             | SHA-256 (Proof-of-Work)     |
+| **Block Time**            | 5 minutes                   |
+| **Block Reward**          | 10 KAWRA                    |
+| **Halving Interval**      | 200,000 blocks              |
+| **Max Supply**            | 4,000,000 KAWRA             |
+| **Public Address Prefix** | K                           |
+| **RPC Port**              | 23917                       |
+| **P2P Port**              | 23918                       |
+| **Dev Reward**            | ❌ None                     |
+| **Difficulty Adjustment** | Every 2 hours (~24 blocks)  |
+| **Source Base**           | Bitcoin Core 25.0           |
+| **License**               | MIT                         |
 
-License
--------
+---
 
-Kawra Core is released under the terms of the MIT license. See [COPYING](COPYING) for more
-information or see https://opensource.org/licenses/MIT.
+## ⚙️ Sample Configuration (`kawra.conf`)
 
-Development Process
--------------------
+Place this in: `~/.kawra/kawra.conf`
 
-The `master` branch is regularly built (see `doc/build-*.md` for instructions) and tested, but it is not guaranteed to be
-completely stable. [Tags](https://github.com/kawra/kawra/tags) are created
-regularly from release branches to indicate new official, stable release versions of Kawra Core.
+```ini
+rpcuser=rpc_kawra
+rpcpassword=dR2oBQ3K1zYMZQtJFZeAerhWxaJ5Lqeq9J2
+rpcbind=127.0.0.1
+rpcallowip=127.0.0.1
+listen=1
+server=1
+txindex=1
+daemon=1
+```
 
-The https://github.com/kawra-core/gui repository is used exclusively for the
-development of the GUI. Its master branch is identical in all monotree
-repositories. Release branches and tags do not exist, so please do not fork
-that repository unless it is for development reasons.
+---
 
-The contribution workflow is described in [CONTRIBUTING.md](CONTRIBUTING.md)
-and useful hints for developers can be found in [doc/developer-notes.md](doc/developer-notes.md).
+## 🧱 Compile Kawra Wallet from Source
 
-Testing
--------
+### 🖥️ Linux Wallet Build (Ubuntu Server 22.04)
 
-Testing and code review is the bottleneck for development; we get more pull
-requests than we can review and test on short notice. Please be patient and help out by testing
-other people's pull requests, and remember this is a security-critical project where any mistake might cost people
-lots of money.
+```bash
+sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get install make automake cmake curl g++-multilib libtool binutils-gold \
+bsdmainutils pkg-config python3 patch bison -y
 
-### Automated Testing
+cd ~/
+mkdir source_code
+cd source_code
+wget "https://github.com/kawracoin/KawraTools/raw/main/kawra-source-code.tar.gz" -O kawra-source-code.tar.gz
+tar -xzvf kawra-source-code.tar.gz
+```
 
-Developers are strongly encouraged to write [unit tests](src/test/README.md) for new code, and to
-submit new unit tests for old code. Unit tests can be compiled and run
-(assuming they weren't disabled in configure) with: `make check`. Further details on running
-and extending unit tests can be found in [/src/test/README.md](/src/test/README.md).
+#### 64-bit Build
+```bash
+PATH=$(echo "$PATH" | sed -e 's/:\/mnt.*//g')
+cd depends
+make HOST=x86_64-pc-linux-gnu
+cd ..
+./autogen.sh
+CONFIG_SITE=$PWD/depends/x86_64-pc-linux-gnu/share/config.site ./configure --prefix=/
+make
+```
 
-There are also [regression and integration tests](/test), written
-in Python.
-These tests can be run (if the [test dependencies](/test) are installed) with: `test/functional/test_runner.py`
+#### Optional Cleanup
+```bash
+make clean
+```
 
-The CI (Continuous Integration) systems make sure that every pull request is built for Windows, Linux, and macOS,
-and that unit/sanity tests are run automatically.
+#### 32-bit Build
+```bash
+cd depends
+make HOST=i686-pc-linux-gnu
+cd ..
+./autogen.sh
+CONFIG_SITE=$PWD/depends/i686-pc-linux-gnu/share/config.site ./configure --prefix=/
+make
+```
 
-### Manual Quality Assurance (QA) Testing
+---
 
-Changes should be tested by somebody other than the developer who wrote the
-code. This is especially important for large or high-risk changes. It is useful
-to add a test plan to the pull request description if testing the changes is
-not straightforward.
+### 🪟 Windows Wallet Build (on Ubuntu Server 22.04)
 
-Translations
-------------
+```bash
+sudo apt-get update && sudo apt-get upgrade -y
+sudo apt-get install make automake cmake curl g++-multilib libtool binutils-gold \
+bsdmainutils pkg-config python3 patch bison -y
 
-Changes to translations as well as new translations can be submitted to
-[Kawra Core's Transifex page](https://www.transifex.com/kawra/kawra/).
+cd ~/
+mkdir source_code
+cd source_code
+wget "https://github.com/kawracoin/KawraTools/raw/main/kawra-source-code.tar.gz" -O kawra-source-code.tar.gz
+tar -xzvf kawra-source-code.tar.gz
 
-Translations are periodically pulled from Transifex and merged into the git repository. See the
-[translation process](doc/translation_process.md) for details on how this works.
+sudo apt-get install g++-mingw-w64-x86-64 -y
+sudo update-alternatives --set x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++-posix
 
-**Important**: We do not accept translation changes as GitHub pull requests because the next
-pull from Transifex would automatically overwrite them again.
+cd depends
+make HOST=x86_64-w64-mingw32
+cd ..
+./autogen.sh
+CONFIG_SITE=$PWD/depends/x86_64-w64-mingw32/share/config.site ./configure --prefix=/
+make
+```
+
+---
+
+## 🚀 Running Kawra
+
+```bash
+./src/kawrad -daemon
+./src/kawra-cli getnewaddress
+./src/kawra-cli getbalance
+./src/kawra-cli sendtoaddress <address> <amount>
+```
+
+---
+
+## 🌐 Network
+
+- **Main Node**: `node1.kawra.org`
+- **Block Explorer**: [https://explorer.kawra.org](https://explorer.kawra.org)
+- **Mining Pool**: [http://pool.kawra.org](http://pool.kawra.org)
+
+---
+
+## ✅ Testnet
+
+```bash
+./src/kawrad -testnet -daemon
+```
+
+---
+
+## 🤝 Contributing
+
+We welcome community contributions. Fork the repo, create a branch, and submit a pull request.  
+See [`CONTRIBUTING.md`](CONTRIBUTING.md) for details.
+
+---
+
+## 🛡️ License
+
+Kawra is open-source software licensed under the [MIT License](COPYING).
