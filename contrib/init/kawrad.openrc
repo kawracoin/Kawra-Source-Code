@@ -1,0 +1,93 @@
+#!/sbin/openrc-run
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/kawra/.kawra" ]; then
+	KAWRAD_DEFAULT_DATADIR="/var/lib/kawra/.kawra"
+else
+	KAWRAD_DEFAULT_DATADIR="/var/lib/kawrad"
+fi
+
+KAWRAD_CONFIGFILE=${KAWRAD_CONFIGFILE:-/etc/kawra/kawra.conf}
+KAWRAD_PIDDIR=${KAWRAD_PIDDIR:-/var/run/kawrad}
+KAWRAD_PIDFILE=${KAWRAD_PIDFILE:-${KAWRAD_PIDDIR}/kawrad.pid}
+KAWRAD_DATADIR=${KAWRAD_DATADIR:-${KAWRAD_DEFAULT_DATADIR}}
+KAWRAD_USER=${KAWRAD_USER:-${KAWRA_USER:-kawra}}
+KAWRAD_GROUP=${KAWRAD_GROUP:-kawra}
+KAWRAD_BIN=${KAWRAD_BIN:-/usr/bin/kawrad}
+KAWRAD_NICE=${KAWRAD_NICE:-${NICELEVEL:-0}}
+KAWRAD_OPTS="${KAWRAD_OPTS:-${KAWRA_OPTS}}"
+
+name="Kawra Core Daemon"
+description="Kawra cryptocurrency P2P network daemon"
+
+command="/usr/bin/kawrad"
+command_args="-pid=\"${KAWRAD_PIDFILE}\" \
+		-conf=\"${KAWRAD_CONFIGFILE}\" \
+		-datadir=\"${KAWRAD_DATADIR}\" \
+		-daemon \
+		${KAWRAD_OPTS}"
+
+required_files="${KAWRAD_CONFIGFILE}"
+start_stop_daemon_args="-u ${KAWRAD_USER} \
+			-N ${KAWRAD_NICE} -w 2000"
+pidfile="${KAWRAD_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${KAWRAD_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${KAWRAD_USER}:${KAWRAD_GROUP}" \
+	"${KAWRAD_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${KAWRAD_USER}:${KAWRAD_GROUP}" \
+	"${KAWRAD_PIDDIR}"
+
+	checkpath -f \
+	-o "${KAWRAD_USER}:${KAWRAD_GROUP}" \
+	-m 0660 \
+	"${KAWRAD_CONFIGFILE}"
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if grep -qs '^rpcuser=' "${KAWRAD_CONFIGFILE}" && \
+		! grep -qs '^rpcpassword=' "${KAWRAD_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run kawrad."
+		eerror "The setting must appear in ${KAWRAD_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following "
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Kawra Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

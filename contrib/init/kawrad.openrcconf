@@ -1,0 +1,33 @@
+# /etc/conf.d/kawrad: config file for /etc/init.d/kawrad
+
+# Config file location
+#KAWRAD_CONFIGFILE="/etc/kawra/kawra.conf"
+
+# What directory to write pidfile to?  (created and owned by $KAWRAD_USER)
+#KAWRAD_PIDDIR="/var/run/kawrad"
+
+# What filename to give the pidfile
+#KAWRAD_PIDFILE="${KAWRAD_PIDDIR}/kawrad.pid"
+
+# Where to write kawrad data (be mindful that the blockchain is large)
+#KAWRAD_DATADIR="/var/lib/kawrad"
+
+# User and group to own kawrad process
+#KAWRAD_USER="kawra"
+#KAWRAD_GROUP="kawra"
+
+# Path to kawrad executable
+#KAWRAD_BIN="/usr/bin/kawrad"
+
+# Nice value to run kawrad under
+#KAWRAD_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+#KAWRAD_OPTS=""
+
+# The timeout in seconds OpenRC will wait for kawrad to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+KAWRAD_SIGTERM_TIMEOUT=600

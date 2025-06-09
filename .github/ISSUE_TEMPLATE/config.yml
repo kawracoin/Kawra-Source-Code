@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Kawra Core Security Policy
+    url: https://github.com/kawra/kawra/blob/master/SECURITY.md
+    about: View security policy
+  - name: Kawra Core Developers
+    url: https://bitcoincore.org
+    about: Kawra Core homepage
