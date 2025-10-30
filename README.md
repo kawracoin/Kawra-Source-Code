@@ -139,21 +139,24 @@ make
 
 ---
 
-⚠️ Windows Wallet Sync Troubleshooting
-
-If your Windows wallet is not syncing, open the Debug Console (found under Help → Debug Window → Console) and type the following commands:
-
-addnode node1.kawra.org:23918 onetry
-addnode radioactive.sytes.net:23918 onetry
-
-
-This will manually connect your wallet to active Kawra peers and help start the blockchain sync.
-
 ## ✅ Testnet
 
 ```bash
 ./src/kawrad -testnet -daemon
 ```
+
+---
+
+## ⚠️ Windows Wallet Sync Troubleshooting
+
+If your **Windows wallet** is not syncing, open the **Debug Console** (found under *Help → Debug Window → Console*) and type the following commands:
+
+```
+addnode node1.kawra.org:23918 onetry
+addnode radioactive.sytes.net:23918 onetry
+```
+
+This will manually connect your wallet to active Kawra peers and help start the blockchain sync.
 
 ---
 
